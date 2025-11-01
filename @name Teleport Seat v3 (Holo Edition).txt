@@ -1,0 +1,100 @@
+@name Teleport Seat v3 (Holo Edition)
+@inputs 
+@outputs
+@persist [O E Base Prop1 Prop2]:entity [Seat1 Seat2]:entity
+@trigger
+@strict
+@model models/props_lab/reciever01c.mdl
+
+runOnTick(1)
+
+if (first() | duped() & perf()) {
+    O = owner()
+    E = entity()
+    propSpawnUndo(0)
+
+    # Invisible base holo
+    Base = holoCreate(0)
+    holoAlpha(0,0)
+
+    # Props for teleport pads
+    Prop1 = propSpawn("models/hunter/plates/plate05x1.mdl",E:toWorld(vec(0,50,0)),Base:angles(),1)
+    Prop1:setMaterial("models/gibs/metalgibs/metal_gibs")
+
+    Prop2 = propSpawn("models/hunter/plates/plate05x1.mdl",E:toWorld(vec(0,-50,0)),Base:angles(),1)
+    Prop2:setMaterial("models/gibs/metalgibs/metal_gibs")
+
+    # Decorative holos instead of props
+    holoCreate(3)
+    holoModel(3,"models/hunter/plates/plate1.mdl")
+    holoMaterial(3,"models/gibs/metalgibs/metal_gibs")
+    holoPos(3,Prop1:toWorld(vec(0,0,107)))
+    holoParent(3,Prop1)
+    holoColor(3,vec(255,80,80))
+
+    holoCreate(4)
+    holoModel(4,"models/hunter/plates/plate1.mdl")
+    holoMaterial(4,"models/gibs/metalgibs/metal_gibs")
+    holoPos(4,Prop2:toWorld(vec(0,0,107)))
+    holoParent(4,Prop2)
+    holoColor(4,vec(80,255,255))
+
+    # Seat 1
+    Seat1 = seatSpawn("models/props_c17/door01_left.mdl",Prop1:toWorld(vec(0,-23,55)),Base:angles(),1)
+    Seat1:setCollisionGroup(2)
+    Seat1:propStatic(1)
+    Seat1:setMaterial("models/effects/invulnerability/invulnerability_red")
+
+    holoCreate(1)
+    holoMaterial(1,"effects/combineshield/comshieldwall")
+    holoColor(1,vec(255,0,0))
+    holoPos(1,Prop1:toWorld(vec(0,-23,55)))
+    holoModel(1,"models/props_c17/door01_left.mdl")
+    holoParent(1,Seat1)
+
+    # Seat 2
+    Seat2 = seatSpawn("models/props_c17/door01_left.mdl",Prop2:toWorld(vec(0,-23,55)),Base:angles(),1)
+    Seat2:setCollisionGroup(2)
+    Seat2:propStatic(1)
+    Seat2:setMaterial("models/effects/invulnerability/invulnerability_blue")
+
+    holoCreate(2)
+    holoMaterial(2,"effects/combineshield/comshieldwall")
+    holoColor(2,vec(0,255,255))
+    holoPos(2,Prop2:toWorld(vec(0,-23,55)))
+    holoModel(2,"models/props_c17/door01_left.mdl")
+    holoParent(2,Seat2)
+
+} else {
+    # Safety checks
+    if (!Prop1:isValid() | !Prop2:isValid() | !Seat1:isValid() | !Seat2:isValid()) {
+        reset()
+    }
+
+    # Update seat angles
+    if (Seat1:angles() != Prop1:angles()) { Seat1:setAng(Prop1:angles()) }
+    if (Seat2:angles() != Prop2:angles()) { Seat2:setAng(Prop2:angles()) }
+
+    # Teleport logic
+    if (Seat1:driver():isValid()) {
+        Seat1:setPos(Prop2:toWorld(vec(0,-23,-100)))
+        Seat1:ejectPod()
+        Prop2:emitSound("k_lab.teleport_spark")
+    } else {
+        Seat1:setPos(Prop1:toWorld(vec(0,-23,55)))
+    }
+
+    if (Seat2:driver():isValid()) {
+        Seat2:setPos(Prop1:toWorld(vec(0,-23,-100)))
+        Seat2:ejectPod()
+        Prop1:emitSound("k_lab.teleport_spark")
+    } else {
+        Seat2:setPos(Prop2:toWorld(vec(0,-23,55)))
+    }
+}
+
+if (first() | duped()) {
+    print("Made By Spongebob STEAM_0:0:779733865")
+    print("And Funzer STEAM_0:1:446667042")
+    hint("Made By Spongebob STEAM_0:0:779733865 and Funzer STEAM_0:1:446667042",5)
+}
